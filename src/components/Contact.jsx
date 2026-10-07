@@ -34,56 +34,41 @@ export default function Contact() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const accessKey = profile.web3formsAccessKey;
+    const accessKey =
+      import.meta.env.VITE_WEB3FORMS_ACCESS_KEY ||
+      profile.web3formsAccessKey ||
+      'a14f7263-14c6-443b-a7b6-cbb42069b24c';
 
-    if (accessKey) {
-      try {
-        const response = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            access_key: accessKey,
-            name: formState.name,
-            email: formState.email,
-            subject: formState.subject || `Portfolio Inquiry from ${formState.name}`,
-            message: formState.message,
-          }),
-        });
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          access_key: accessKey,
+          name: formState.name,
+          email: formState.email,
+          subject: formState.subject || `Portfolio Inquiry from ${formState.name}`,
+          message: formState.message,
+        }),
+      });
 
-        const data = await response.json();
-        if (data.success) {
-          setSubmitted(true);
-          setFormState({ name: '', email: '', subject: '', message: '' });
-          setTimeout(() => setSubmitted(false), 5000);
-        } else {
-          // Fallback to mailto draft if API returns error
-          triggerMailto();
-        }
-      } catch (err) {
-        triggerMailto();
-      } finally {
-        setIsSubmitting(false);
+      const data = await response.json();
+      if (data.success) {
+        setSubmitted(true);
+        setFormState({ name: '', email: '', subject: '', message: '' });
+        setTimeout(() => setSubmitted(false), 5000);
+      } else {
+        alert(data.message || 'Form submission failed. Please try again.');
       }
-    } else {
-      triggerMailto();
+    } catch (err) {
+      console.error('Web3Forms submission error:', err);
+      alert('Failed to submit form. Please check your network connection.');
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const triggerMailto = () => {
-    const subject = encodeURIComponent(formState.subject || `Portfolio Contact from ${formState.name || 'Visitor'}`);
-    const body = encodeURIComponent(
-      `Name: ${formState.name}\nEmail: ${formState.email}\n\nMessage:\n${formState.message}`
-    );
-
-    window.open(`mailto:${profile.email}?subject=${subject}&body=${body}`, '_blank');
-
-    setIsSubmitting(false);
-    setSubmitted(true);
-    setFormState({ name: '', email: '', subject: '', message: '' });
-    setTimeout(() => setSubmitted(false), 5000);
   };
 
   const contactItems = [

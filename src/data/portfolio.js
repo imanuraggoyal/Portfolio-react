@@ -19,6 +19,7 @@ export const profile = {
     email: "mailto:goyal3114@gmail.com",
     phone: "tel:+919179064410",
   },
+  web3formsAccessKey: import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "a14f7263-14c6-443b-a7b6-cbb42069b24c",
 };
 
 export const stats = [
