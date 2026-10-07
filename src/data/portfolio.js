@@ -14,7 +14,7 @@ export const profile = {
   phone: "+91 9179064410",
   resumeLink: "./Anurag_Goyal_Resume.pdf",
   socialLinks: {
-    github: "https://github.com/Anuraggoyal3114",
+    github: "https://github.com/imanuraggoyal",
     linkedin: "https://www.linkedin.com/in/anurag-goyal-349750128",
     email: "mailto:goyal3114@gmail.com",
     phone: "tel:+919179064410",

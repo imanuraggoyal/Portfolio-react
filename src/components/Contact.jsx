@@ -30,17 +30,60 @@ export default function Contact() {
     setTimeout(() => setCopiedField(null), 2500);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API form submission logic or mailto trigger
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitted(true);
-      setFormState({ name: '', email: '', subject: '', message: '' });
-      setTimeout(() => setSubmitted(false), 5000);
-    }, 1200);
+    const accessKey = profile.web3formsAccessKey;
+
+    if (accessKey) {
+      try {
+        const response = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            access_key: accessKey,
+            name: formState.name,
+            email: formState.email,
+            subject: formState.subject || `Portfolio Inquiry from ${formState.name}`,
+            message: formState.message,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setSubmitted(true);
+          setFormState({ name: '', email: '', subject: '', message: '' });
+          setTimeout(() => setSubmitted(false), 5000);
+        } else {
+          // Fallback to mailto draft if API returns error
+          triggerMailto();
+        }
+      } catch (err) {
+        triggerMailto();
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      triggerMailto();
+    }
+  };
+
+  const triggerMailto = () => {
+    const subject = encodeURIComponent(formState.subject || `Portfolio Contact from ${formState.name || 'Visitor'}`);
+    const body = encodeURIComponent(
+      `Name: ${formState.name}\nEmail: ${formState.email}\n\nMessage:\n${formState.message}`
+    );
+
+    window.open(`mailto:${profile.email}?subject=${subject}&body=${body}`, '_blank');
+
+    setIsSubmitting(false);
+    setSubmitted(true);
+    setFormState({ name: '', email: '', subject: '', message: '' });
+    setTimeout(() => setSubmitted(false), 5000);
   };
 
   const contactItems = [
